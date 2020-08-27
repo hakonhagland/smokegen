@@ -205,6 +205,21 @@ QString Type::toString(const QString& fnPtrName, bool prepend) const
     // the compiler would misinterpret ">>" as the operator - replace it with "> >"
     return ret.replace(">>", "> >");
 }
+
+bool Type::isAssignable() {
+    const Class* klass = getClass();   
+    if (klass)
+    {
+        foreach(auto meth, klass->methods()) {
+            if (meth.name() == "operator=" && meth.parameters().first().type() == this) {
+                return !meth.isDeleted();
+            }
+        }
+    }
+    else
+        return true;
+}
+
 void Class::appendMethod(const Method& method, bool checkForConstArguments)
 { 
     if (checkForConstArguments)
