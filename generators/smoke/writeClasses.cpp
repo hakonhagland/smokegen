@@ -224,6 +224,11 @@ void SmokeClassFiles::generateMethod(QTextStream& out, const QString& className,
         for (int i = 0; i < meth.parameters().count(); i++) {
             if (i > 0) out << ", ";
             out << meth.parameters()[i].type()->toString() << " x" << QString::number(i + 1);
+            Type* type = meth.parameters()[i].type();
+            if(type->isFunctionPointer())
+                out << type->toString("x" + QString::number(i + 1));
+            else
+                out << type->toString() << " x" << QString::number(i + 1);
             x_list << "x" + QString::number(i + 1);
         }
         out << ") : " << meth.getClass()->name() << '(' << x_list.join(", ") << ") {}\n";
