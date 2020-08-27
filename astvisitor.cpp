@@ -129,7 +129,7 @@ Class* SmokegenASTVisitor::registerClass(const clang::CXXRecordDecl* clangClass)
     clangClass = clangClass->hasDefinition() ? clangClass->getDefinition() : clangClass->getCanonicalDecl();
 
     QString qualifiedName = QString::fromStdString(clangClass->getQualifiedNameAsString());
-    if (classes.contains(qualifiedName) and not classes[qualifiedName].isForwardDecl()) {
+    if (classes.contains(qualifiedName) && !classes[qualifiedName].isForwardDecl()) {
         // We already have this class
         return &classes[qualifiedName];
     }
@@ -579,7 +579,7 @@ void SmokegenASTVisitor::addQPropertyAnnotations(const clang::CXXRecordDecl* D) 
                             auto lookup = D->lookup(Name);
                             for (clang::NamedDecl* namedDecl : lookup) {
                                 if (clang::CXXMethodDecl* method = clang::dyn_cast<clang::CXXMethodDecl>(namedDecl)) {
-                                    auto annotate = clang::AnnotateAttr(clang::SourceRange(), *ctx, llvm::StringRef("qt_property"), 0).clone(*ctx);
+                                    auto annotate = clang::AnnotateAttr(*ctx, clang::AttributeCommonInfo(clang::SourceRange()), llvm::StringRef("qt_property")).clone(*ctx);
                                     method->addAttr(annotate);
                                 }
                             }
@@ -591,7 +591,7 @@ void SmokegenASTVisitor::addQPropertyAnnotations(const clang::CXXRecordDecl* D) 
                             auto lookup = D->lookup(Name);
                             for (clang::NamedDecl* namedDecl : lookup) {
                                 if (clang::CXXMethodDecl* method = clang::dyn_cast<clang::CXXMethodDecl>(namedDecl)) {
-                                    auto annotate = clang::AnnotateAttr(clang::SourceRange(), *ctx, llvm::StringRef("qt_property"), 0).clone(*ctx);
+                                    auto annotate = clang::AnnotateAttr(*ctx, clang::AttributeCommonInfo(clang::SourceRange()), llvm::StringRef("qt_property")).clone(*ctx);
                                     method->addAttr(annotate);
                                 }
                             }
