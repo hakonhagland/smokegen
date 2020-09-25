@@ -113,6 +113,7 @@ QString SmokeClassFiles::generateMethodBody(const QString& indent, const QString
     QString methodBody;
     QTextStream out(&methodBody);
 
+    //out << "        qDebug(\"Begin of " << meth.toString() << "\");\n";
     out << indent;
 
     if (meth.isConstructor()) {
@@ -156,19 +157,27 @@ QString SmokeClassFiles::generateMethodBody(const QString& indent, const QString
 
         QString field = Util::stackItemField(param.type());
         QString typeName = param.type()->toString();
-        if (param.type()->isArray()) {
-            Type t = *param.type();
-            t.setPointerDepth(t.pointerDepth() + 1);
-            t.setIsRef(false);
-            typeName = t.toString();
-            out << '*';
-        } else if (field == "s_class" && (param.type()->pointerDepth() == 0 || param.type()->isRef()) && !param.type()->isFunctionPointer()) {
-            // references and classes are passed in s_class
-            typeName.append('*');
-            out << '*';
+
+        if (param.type()->name().contains("QWebEngineCallback"))
+        {
+            typeName = "void (*)(const QVariant)";
         }
-        // casting to a reference doesn't make sense in this case
-        if (param.type()->isRef() && !param.type()->isFunctionPointer()) typeName.replace('&', "");
+        else {
+            if (param.type()->isArray()) {
+                Type t = *param.type();
+                t.setPointerDepth(t.pointerDepth() + 1);
+                t.setIsRef(false);
+                typeName = t.toString();
+                out << '*';
+            }
+            else if (field == "s_class" && (param.type()->pointerDepth() == 0 || param.type()->isRef()) && !param.type()->isFunctionPointer()) {
+                // references and classes are passed in s_class
+                typeName.append('*');
+                out << '*';
+            }
+            // casting to a reference doesn't make sense in this case
+            if (param.type()->isRef() && !param.type()->isFunctionPointer()) typeName.replace('&', "");
+        }
         out << "(" << typeName << ")" << "x[" << j + 1 << "]." << field;
     }
 
@@ -190,7 +199,7 @@ QString SmokeClassFiles::generateMethodBody(const QString& indent, const QString
     } else {
         out << indent << "(void)x; // noop (for compiler warning)\n";
     }
-
+    //out << "        qDebug(\"End of " << meth.toString() << "\");\n";
     return methodBody;
 }
 
@@ -223,7 +232,6 @@ void SmokeClassFiles::generateMethod(QTextStream& out, const QString& className,
                                   className, smokeClassName, meth, index, true, includes, privateDestructor);
         out << "        }\n";
     }
-
     out << "    }\n";
     
     // If the constructor was generated from another one with default parameteres, we don't need to explicitly create
